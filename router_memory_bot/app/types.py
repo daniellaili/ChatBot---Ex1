@@ -1,0 +1,52 @@
+"""Shared typed structures for routing, chat, and configuration."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Literal, TypedDict
+
+IntentName = Literal["weather", "math", "exchange_rate", "general_chat"]
+
+
+class ChatMessage(TypedDict):
+    """Single turn in persisted conversation history."""
+
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class ClassificationPayload(TypedDict, total=False):
+    """Strict JSON contract from the classifier LLM (all fields optional at parse time)."""
+
+    intent: str
+    city: str
+    expression: str
+    currency_code: str
+
+
+@dataclass(frozen=True, slots=True)
+class RoutingDecision:
+    """Validated routing outcome after parsing classifier JSON."""
+
+    intent: IntentName
+    city: str | None = None
+    expression: str | None = None
+    currency_code: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class LLMConfig:
+    """OpenAI-compatible client settings (any provider)."""
+
+    api_key: str
+    base_url: str | None
+    model: str
+
+
+def message_dict(role: Literal["user", "assistant"], content: str) -> ChatMessage:
+    return {"role": role, "content": content}
+
+
+def history_to_openai_messages(history: list[ChatMessage]) -> list[dict[str, Any]]:
+    """Convert internal history to the chat.completions message shape."""
+    return [{"role": m["role"], "content": m["content"]} for m in history]
