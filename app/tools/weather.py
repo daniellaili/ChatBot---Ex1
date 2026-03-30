@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import json
+import urllib.error
 import urllib.parse
-
-import httpx
+import urllib.request
 
 _GEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
 _FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
@@ -17,12 +18,12 @@ def get_weather(city: str) -> str:
 
     try:
         geo_params = urllib.parse.urlencode({"name": name, "count": 1, "language": "en", "format": "json"})
-        with httpx.Client(timeout=15.0) as client:
-            geo_resp = client.get(f"{_GEO_URL}?{geo_params}")
-            geo_resp.raise_for_status()
-            geo = geo_resp.json()
-    except httpx.HTTPError as exc:
-        return f"Geocoding service error: {exc}"
+        with urllib.request.urlopen("{0}?{1}".format(_GEO_URL, geo_params), timeout=15) as response:
+            geo = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        return "Geocoding service error: {0}".format(exc)
+    except urllib.error.URLError as exc:
+        return "Geocoding service unavailable: {0}".format(exc.reason)
     except ValueError:
         return "Geocoding service returned invalid data."
 
@@ -48,12 +49,12 @@ def get_weather(city: str) -> str:
                 "timezone": "auto",
             }
         )
-        with httpx.Client(timeout=15.0) as client:
-            fc_resp = client.get(f"{_FORECAST_URL}?{fc_params}")
-            fc_resp.raise_for_status()
-            fc = fc_resp.json()
-    except httpx.HTTPError as exc:
-        return f"Weather service error: {exc}"
+        with urllib.request.urlopen("{0}?{1}".format(_FORECAST_URL, fc_params), timeout=15) as response:
+            fc = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        return "Weather service error: {0}".format(exc)
+    except urllib.error.URLError as exc:
+        return "Weather service unavailable: {0}".format(exc.reason)
     except ValueError:
         return "Weather service returned invalid data."
 

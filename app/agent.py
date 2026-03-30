@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import List
 
 from app.general_chat import general_chat
 from app.memory import load_history, save_history
@@ -13,17 +14,17 @@ from app.tools.weather import get_weather
 from app.types import ChatMessage, LLMConfig, message_dict
 
 
-def load_session(history_path: Path) -> list[ChatMessage]:
+def load_session(history_path: Path) -> List[ChatMessage]:
     return load_history(history_path)
 
 
-def reset_session(history: list[ChatMessage], history_path: Path) -> None:
+def reset_session(history: List[ChatMessage], history_path: Path) -> None:
     history.clear()
     save_history(history_path, history)
 
 
 def handle_user_message(
-    history: list[ChatMessage],
+    history: List[ChatMessage],
     history_path: Path,
     llm_config: LLMConfig,
     user_text: str,

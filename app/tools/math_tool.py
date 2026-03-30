@@ -5,10 +5,9 @@ from __future__ import annotations
 import ast
 import math
 import operator
-from typing import Any
+from typing import Any, Dict, Type, Union
 
-
-_ALLOWED_BINOPS: dict[type[ast.operator], Any] = {
+_ALLOWED_BINOPS: Dict[Type[ast.operator], Any] = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
     ast.Mult: operator.mul,
@@ -18,12 +17,12 @@ _ALLOWED_BINOPS: dict[type[ast.operator], Any] = {
     ast.Pow: operator.pow,
 }
 
-_ALLOWED_UNARY: dict[type[ast.unaryop], Any] = {
+_ALLOWED_UNARY: Dict[Type[ast.unaryop], Any] = {
     ast.UAdd: operator.pos,
     ast.USub: operator.neg,
 }
 
-_ALLOWED_FUNCS: dict[str, Any] = {
+_ALLOWED_FUNCS: Dict[str, Any] = {
     "abs": abs,
     "round": round,
     "min": min,
@@ -38,7 +37,7 @@ _ALLOWED_FUNCS: dict[str, Any] = {
     "floor": math.floor,
 }
 
-_ALLOWED_NAMES: dict[str, float] = {
+_ALLOWED_NAMES: Dict[str, float] = {
     "pi": math.pi,
     "e": math.e,
 }
@@ -48,7 +47,7 @@ class UnsafeExpressionError(ValueError):
     pass
 
 
-def _eval_node(node: ast.AST) -> float | int:
+def _eval_node(node: ast.AST) -> Union[float, int]:
     if isinstance(node, ast.Expression):
         return _eval_node(node.body)
     if isinstance(node, ast.Constant):
@@ -64,21 +63,21 @@ def _eval_node(node: ast.AST) -> float | int:
     if isinstance(node, ast.Name):
         if node.id in _ALLOWED_NAMES:
             return _ALLOWED_NAMES[node.id]
-        raise UnsafeExpressionError(f"Name '{node.id}' is not allowed.")
+        raise UnsafeExpressionError("Name '{0}' is not allowed.".format(node.id))
     if isinstance(node, ast.Call):
         if not isinstance(node.func, ast.Name):
             raise UnsafeExpressionError("Only simple function calls are allowed.")
         name = node.func.id
         if name not in _ALLOWED_FUNCS:
-            raise UnsafeExpressionError(f"Function '{name}' is not allowed.")
+            raise UnsafeExpressionError("Function '{0}' is not allowed.".format(name))
         fn = _ALLOWED_FUNCS[name]
-        args = [_eval_node(a) for a in node.args]
+        args = [_eval_node(arg) for arg in node.args]
         if node.keywords:
             raise UnsafeExpressionError("Keyword arguments are not allowed.")
         try:
             return fn(*args)
         except Exception as exc:
-            raise UnsafeExpressionError(str(exc)) from exc
+            raise UnsafeExpressionError(str(exc))
     raise UnsafeExpressionError("Unsupported syntax in expression.")
 
 
@@ -93,10 +92,10 @@ def calculate_math(expression: str) -> str:
             result = int(result)
         return str(result)
     except SyntaxError as exc:
-        return f"Could not parse expression: {exc.msg}"
+        return "Could not parse expression: {0}".format(exc.msg)
     except UnsafeExpressionError as exc:
-        return f"Expression not allowed or invalid: {exc}"
+        return "Expression not allowed or invalid: {0}".format(exc)
     except ZeroDivisionError:
         return "Division by zero."
     except Exception as exc:
-        return f"Could not evaluate: {exc}"
+        return "Could not evaluate: {0}".format(exc)

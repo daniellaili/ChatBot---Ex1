@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
-
-from openai import OpenAI
+from typing import Any, Dict, Optional, Sequence
 
 from app.types import LLMConfig
 
 
-def _build_client(cfg: LLMConfig) -> OpenAI:
-    kwargs: dict[str, Any] = {"api_key": cfg.api_key or "missing-key"}
+def _build_client(cfg: LLMConfig) -> Any:
+    try:
+        from openai import OpenAI
+    except ImportError as exc:
+        raise RuntimeError(
+            "The 'openai' package is not installed. Install it to use LLM chat features."
+        ) from exc
+
+    kwargs: Dict[str, Any] = {"api_key": cfg.api_key or "missing-key"}
     if cfg.base_url:
         kwargs["base_url"] = cfg.base_url
     return OpenAI(**kwargs)
@@ -18,10 +23,10 @@ def _build_client(cfg: LLMConfig) -> OpenAI:
 
 def chat_completion(
     cfg: LLMConfig,
-    messages: Sequence[dict[str, str]],
+    messages: Sequence[Dict[str, str]],
     *,
     temperature: float = 0.2,
-    max_tokens: int | None = None,
+    max_tokens: Optional[int] = None,
 ) -> str:
     """
     Run a chat completion. Uses the configured model and provider endpoint.
@@ -33,7 +38,7 @@ def chat_completion(
         raise ValueError("LLM_API_KEY is not set.")
 
     client = _build_client(cfg)
-    req: dict[str, Any] = {
+    req: Dict[str, Any] = {
         "model": cfg.model,
         "messages": list(messages),
         "temperature": temperature,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal, TypedDict
+from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 IntentName = Literal["weather", "math", "exchange_rate", "general_chat"]
 
@@ -24,22 +24,22 @@ class ClassificationPayload(TypedDict, total=False):
     currency_code: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class RoutingDecision:
     """Validated routing outcome after parsing classifier JSON."""
 
     intent: IntentName
-    city: str | None = None
-    expression: str | None = None
-    currency_code: str | None = None
+    city: Optional[str] = None
+    expression: Optional[str] = None
+    currency_code: Optional[str] = None
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class LLMConfig:
     """OpenAI-compatible client settings (any provider)."""
 
     api_key: str
-    base_url: str | None
+    base_url: Optional[str]
     model: str
 
 
@@ -47,6 +47,6 @@ def message_dict(role: Literal["user", "assistant"], content: str) -> ChatMessag
     return {"role": role, "content": content}
 
 
-def history_to_openai_messages(history: list[ChatMessage]) -> list[dict[str, Any]]:
+def history_to_openai_messages(history: List[ChatMessage]) -> List[Dict[str, Any]]:
     """Convert internal history to the chat.completions message shape."""
     return [{"role": m["role"], "content": m["content"]} for m in history]

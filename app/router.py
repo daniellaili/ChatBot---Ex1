@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any
+from typing import Any, FrozenSet, Optional
 
 from app.llm_client import chat_completion
 from app.prompts import CLASSIFIER_SYSTEM
 from app.types import ClassificationPayload, IntentName, LLMConfig, RoutingDecision
 
-_VALID_INTENTS: frozenset[str] = frozenset({"weather", "math", "exchange_rate", "general_chat"})
+_VALID_INTENTS: FrozenSet[str] = frozenset({"weather", "math", "exchange_rate", "general_chat"})
 
 
-def _extract_json_object(text: str) -> str | None:
+def _extract_json_object(text: str) -> Optional[str]:
     text = text.strip()
     if text.startswith("{") and text.endswith("}"):
         return text
@@ -27,7 +27,7 @@ def _extract_json_object(text: str) -> str | None:
     return None
 
 
-def _coerce_str(value: Any) -> str | None:
+def _coerce_str(value: Any) -> Optional[str]:
     if value is None:
         return None
     if isinstance(value, str):
@@ -36,7 +36,7 @@ def _coerce_str(value: Any) -> str | None:
     return None
 
 
-def _parse_payload(raw: str) -> ClassificationPayload | None:
+def _parse_payload(raw: str) -> Optional[ClassificationPayload]:
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
@@ -46,7 +46,7 @@ def _parse_payload(raw: str) -> ClassificationPayload | None:
     return data  # type: ignore[return-value]
 
 
-def _validate_routing(payload: ClassificationPayload) -> RoutingDecision | None:
+def _validate_routing(payload: ClassificationPayload) -> Optional[RoutingDecision]:
     intent_raw = payload.get("intent")
     if not isinstance(intent_raw, str):
         return None
