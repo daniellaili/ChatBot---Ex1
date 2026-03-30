@@ -1,50 +1,56 @@
 from __future__ import annotations
 
-import asyncio
+import sys
 
-from app.agent import Agent
-from app.config import get_settings
-from app.memory import history_exists
+from app.agent import handle_user_message, load_session, reset_session
+from app.config import get_history_path, get_llm_config
 
 
-async def run() -> None:
-    settings = get_settings()
+def _print_banner() -> None:
+    print("Router & Memory Bot")
+    print("Commands: exit | quit | /reset")
+    print("Uses LLM_* env vars (OpenAI-compatible API).")
+    print()
 
-    if not settings.llm_api_key:
-        print("Missing LLM_API_KEY in .env")
-        return
 
-    if not settings.llm_base_url:
-        print("Missing LLM_BASE_URL in .env")
-        return
+def main() -> int:
+    _print_banner()
+    cfg = get_llm_config()
+    history_path = get_history_path()
+    history = load_session(history_path)
 
-    had_history = history_exists(settings.history_file)
-    agent = Agent.create(settings)
-
-    print("Router & Memory Bot started.")
-    if had_history and agent.history:
-        print("Welcome back. Previous history was loaded.")
-    else:
-        print("Starting a fresh conversation.")
-    print("Type '/reset' to clear memory. Type 'exit' to quit.\n")
+    if not cfg.api_key or not cfg.model:
+        print(
+            "Warning: LLM_API_KEY and LLM_MODEL should be set for full functionality.",
+            file=sys.stderr,
+        )
 
     while True:
         try:
-            user_input = input("You: ").strip()
-        except (KeyboardInterrupt, EOFError):
-            print("\nGoodbye.")
-            break
+            line = input("You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nBye.")
+            return 0
 
-        if not user_input:
+        if not line:
             continue
 
-        if user_input.lower() in {"exit", "quit"}:
-            print("Goodbye.")
-            break
+        lower = line.lower()
+        if lower in {"exit", "quit", "/exit", "/quit"}:
+            print("Bye.")
+            return 0
+        if lower == "/reset":
+            reset_session(history, history_path)
+            print("History cleared.")
+            continue
 
-        response = await agent.handle_input(user_input)
-        print(f"Bot: {response}\n")
+        try:
+            answer = handle_user_message(history, history_path, cfg, line)
+        except Exception as exc:
+            print("Bot: Something went wrong: {0}".format(exc))
+            continue
+        print("Bot: {0}".format(answer))
 
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    raise SystemExit(main())

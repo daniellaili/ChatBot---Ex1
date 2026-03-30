@@ -19,6 +19,7 @@ def load_history(path: Path) -> List[ChatMessage]:
         return []
     if not isinstance(data, list):
         return []
+
     out: List[ChatMessage] = []
     for item in data:
         if not isinstance(item, dict):

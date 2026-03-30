@@ -31,8 +31,8 @@ def _coerce_str(value: Any) -> Optional[str]:
     if value is None:
         return None
     if isinstance(value, str):
-        s = value.strip()
-        return s if s else None
+        stripped = value.strip()
+        return stripped if stripped else None
     return None
 
 
@@ -43,42 +43,33 @@ def _parse_payload(raw: str) -> Optional[ClassificationPayload]:
         return None
     if not isinstance(data, dict):
         return None
-    return data  # type: ignore[return-value]
+    return data
 
 
 def _validate_routing(payload: ClassificationPayload) -> Optional[RoutingDecision]:
     intent_raw = payload.get("intent")
     if not isinstance(intent_raw, str):
         return None
+
     intent_norm = intent_raw.strip().lower()
     if intent_norm not in _VALID_INTENTS:
         return None
-    intent: IntentName = intent_norm  # type: ignore[assignment]
+    intent: IntentName = intent_norm
 
     city = _coerce_str(payload.get("city"))
     expression = _coerce_str(payload.get("expression"))
     currency = _coerce_str(payload.get("currency_code"))
 
     if intent == "weather":
-        if not city:
-            return None
-        return RoutingDecision(intent=intent, city=city)
+        return RoutingDecision(intent=intent, city=city) if city else None
     if intent == "math":
-        if not expression:
-            return None
-        return RoutingDecision(intent=intent, expression=expression)
+        return RoutingDecision(intent=intent, expression=expression) if expression else None
     if intent == "exchange_rate":
-        if not currency:
-            return None
-        return RoutingDecision(intent=intent, currency_code=currency)
+        return RoutingDecision(intent=intent, currency_code=currency) if currency else None
     return RoutingDecision(intent="general_chat")
 
 
 def classify_intent(cfg: LLMConfig, user_input: str) -> RoutingDecision:
-    """
-    Classify the latest user message. On invalid JSON, missing fields, or unknown intent,
-    returns intent general_chat so the orchestrator uses the general chat path.
-    """
     trimmed = user_input.strip()
     if not trimmed:
         return RoutingDecision(intent="general_chat")

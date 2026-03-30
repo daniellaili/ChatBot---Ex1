@@ -1,4 +1,4 @@
-CLASSIFICATION_SYSTEM_PROMPT = """
+CLASSIFIER_SYSTEM = """
 You are a routing classifier for a chatbot.
 
 Classify the user's message into exactly one of these intents:
@@ -39,7 +39,7 @@ User: "Tell me a joke"
 """.strip()
 
 
-GENERAL_CHAT_SYSTEM_PROMPT = """
+GENERAL_CHAT_SYSTEM = """
 You are a helpful assistant.
 Answer clearly, naturally, and briefly unless the user asks for more detail.
 """.strip()

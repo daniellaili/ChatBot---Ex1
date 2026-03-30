@@ -16,7 +16,7 @@ class ChatMessage(TypedDict):
 
 
 class ClassificationPayload(TypedDict, total=False):
-    """Strict JSON contract from the classifier LLM (all fields optional at parse time)."""
+    """Strict JSON contract from the classifier LLM."""
 
     intent: str
     city: str
@@ -36,7 +36,7 @@ class RoutingDecision:
 
 @dataclass(frozen=True)
 class LLMConfig:
-    """OpenAI-compatible client settings (any provider)."""
+    """OpenAI-compatible client settings."""
 
     api_key: str
     base_url: Optional[str]
@@ -48,5 +48,4 @@ def message_dict(role: Literal["user", "assistant"], content: str) -> ChatMessag
 
 
 def history_to_openai_messages(history: List[ChatMessage]) -> List[Dict[str, Any]]:
-    """Convert internal history to the chat.completions message shape."""
     return [{"role": m["role"], "content": m["content"]} for m in history]

@@ -26,7 +26,6 @@ def _ensure_env_loaded() -> None:
 
 
 def get_llm_config() -> LLMConfig:
-    """Build LLM settings from environment (OpenAI-compatible providers)."""
     _ensure_env_loaded()
     api_key = os.environ.get("LLM_API_KEY", "").strip()
     base_url_raw = os.environ.get("LLM_BASE_URL", "").strip()
@@ -36,7 +35,6 @@ def get_llm_config() -> LLMConfig:
 
 
 def get_history_path() -> Path:
-    """Path to persisted chat history (next to CWD by default)."""
     _ensure_env_loaded()
-    raw = os.environ.get("CHAT_HISTORY_PATH", "history.json").strip()
+    raw = os.environ.get("CHAT_HISTORY_PATH", os.environ.get("HISTORY_FILE", "history.json")).strip()
     return Path(raw).expanduser().resolve()
