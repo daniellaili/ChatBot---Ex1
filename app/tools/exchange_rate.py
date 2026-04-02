@@ -1,39 +1,67 @@
-"""Exchange rates via Frankfurter API (no API key required)."""
-
 from __future__ import annotations
 
-import json
-import urllib.error
-import urllib.parse
-import urllib.request
 
-_RATE_URL = "https://api.frankfurter.app/latest"
+_RATES_VS_ILS: dict[str, float] = {
+    "ILS": 1.0,
+    "USD": 3.65,
+    "EUR": 3.95,
+    "GBP": 4.60,
+    "JPY": 0.024,
+    "CNY": 0.50,
+    "AUD": 2.40,
+    "CAD": 2.70,
+    "CHF": 4.10,
+    "SEK": 0.35,
+    "NOK": 0.34,
+    "DKK": 0.53,
+    "AED": 0.99,
+    "SAR": 0.97,
+    "TRY": 0.11,
+    "EGP": 0.075,
+    "JOD": 5.15,
+    "INR": 0.044,
+    "KRW": 0.0027,
+    "SGD": 2.70,
+    "HKD": 0.47,
+    "THB": 0.10,
+    "MXN": 0.21,
+    "BRL": 0.75,
+    "ARS": 0.0035,
+    "CLP": 0.004,
+}
+
+_ALIASES: dict[str, str] = {
+    "USD": "USD",
+    "DOLLAR": "USD",
+    "DOLLARS": "USD",
+    "US DOLLAR": "USD",
+    "EUR": "EUR",
+    "EURO": "EUR",
+    "EUROS": "EUR",
+    "GBP": "GBP",
+    "POUND": "GBP",
+    "POUNDS": "GBP",
+    "STERLING": "GBP",
+    "JPY": "JPY",
+    "YEN": "JPY",
+    "ILS": "ILS",
+    "SHEKEL": "ILS",
+    "SHEKELS": "ILS",
+    "NIS": "ILS",
+}
+
+
+def normalize_currency_code(currency_code: str) -> str:
+    cleaned = " ".join(currency_code.strip().upper().split())
+    return _ALIASES.get(cleaned, cleaned)
 
 
 def get_exchange_rate(currency_code: str) -> str:
-    code = currency_code.strip().upper()
-    if not code:
-        return "Please specify a currency code."
-    if len(code) != 3 or not code.isalpha():
-        return "Currency code should be a 3-letter ISO code like EUR or JPY."
+    code = normalize_currency_code(currency_code)
+    rate = _RATES_VS_ILS.get(code)
 
-    query = urllib.parse.urlencode({"from": code, "to": "USD", "amount": 1})
-    try:
-        with urllib.request.urlopen("{0}?{1}".format(_RATE_URL, query), timeout=15) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        return "Exchange rate service error: {0}".format(exc)
-    except urllib.error.URLError as exc:
-        return "Exchange rate service unavailable: {0}".format(exc.reason)
-    except ValueError:
-        return "Exchange rate service returned invalid data."
+    if rate is None:
+        supported = ", ".join(sorted(_RATES_VS_ILS.keys()))
+        return f"Unsupported currency code: {code}. Supported currencies: {supported}."
 
-    rates = payload.get("rates") or {}
-    usd_rate = rates.get("USD")
-    if usd_rate is None:
-        return "Could not read the USD exchange rate for {0}.".format(code)
-
-    date = payload.get("date")
-    if date:
-        return "1 {0} = {1} USD (date {2}).".format(code, usd_rate, date)
-    return "1 {0} = {1} USD.".format(code, usd_rate)
+    return f"1 {code} = {rate:.4f} ILS"
