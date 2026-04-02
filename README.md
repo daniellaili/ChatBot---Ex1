@@ -33,7 +33,7 @@ app/
     math_tool.py       Math tool
     exchange_rate.py   Exchange-rate tool
 data/
-  history.json         Saved chat history
+  history.json         Generated local chat history file
 ```
 
 ## Requirements
@@ -110,6 +110,8 @@ python -m app.main
 
 Conversation history is stored as JSON and is loaded automatically on the next run.
 
+By default, history is written to `data/history.json` when `HISTORY_FILE=data/history.json` is set in `.env`. This file is local runtime state and may be ignored by git, so it might not appear in the repository itself.
+
 Current implementation writes history through Python file I/O in `app/memory.py`.
 
 ## Limitations
@@ -117,4 +119,3 @@ Current implementation writes history through Python file I/O in `app/memory.py`
 - Weather depends on external network access.
 - Routing and general chat depend on the configured LLM being reachable.
 - Exchange rates are static dictionary values, not live market data.
-
