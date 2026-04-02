@@ -1,5 +1,3 @@
-"""LLM-based intent classification with strict JSON validation."""
-
 from __future__ import annotations
 
 import json

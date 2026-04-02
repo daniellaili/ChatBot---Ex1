@@ -1,5 +1,3 @@
-"""General LLM chat fallback with full conversation history."""
-
 from __future__ import annotations
 
 from typing import Dict, List

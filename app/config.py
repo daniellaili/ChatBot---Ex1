@@ -1,5 +1,3 @@
-"""Environment-driven configuration for LLM and app paths."""
-
 from __future__ import annotations
 
 import os

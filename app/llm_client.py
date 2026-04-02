@@ -1,5 +1,3 @@
-"""OpenAI-compatible chat client (works with Google, Azure, local servers, etc.)."""
-
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
