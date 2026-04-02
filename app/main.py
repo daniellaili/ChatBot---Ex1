@@ -21,6 +21,7 @@ def main() -> int:
 
     if history:
         print("welcome back!")
+        print()
 
     if not cfg.api_key or not cfg.model:
         print(
