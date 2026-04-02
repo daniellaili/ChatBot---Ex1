@@ -3,8 +3,8 @@ from __future__ import annotations
 
 _RATES_VS_ILS: dict[str, float] = {
     "ILS": 1.0,
-    "USD": 3.65,
-    "EUR": 3.95,
+    "USD": 3.12,
+    "EUR": 3.60,
     "GBP": 4.60,
     "JPY": 0.024,
     "CNY": 0.50,
