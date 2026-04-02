@@ -19,6 +19,9 @@ def main() -> int:
     history_path = get_history_path()
     history = load_session(history_path)
 
+    if history:
+        print("welcome back!")
+
     if not cfg.api_key or not cfg.model:
         print(
             "Warning: LLM_API_KEY and LLM_MODEL should be set for full functionality.",
