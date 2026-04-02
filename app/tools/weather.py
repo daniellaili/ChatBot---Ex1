@@ -1,5 +1,3 @@
-"""Weather via Open-Meteo (no API key required)."""
-
 from __future__ import annotations
 
 import json

@@ -1,5 +1,3 @@
-"""Persistent chat history (JSON file)."""
-
 from __future__ import annotations
 
 import json

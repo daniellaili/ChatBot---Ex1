@@ -1,5 +1,3 @@
-"""Shared typed structures for routing, chat, and configuration."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

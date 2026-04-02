@@ -1,5 +1,3 @@
-"""Orchestrates classification, tool routing, persistence, and general chat."""
-
 from __future__ import annotations
 
 from pathlib import Path
